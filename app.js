@@ -24,16 +24,14 @@ const $$ = sel => document.querySelectorAll(sel);
 // ══════════════════════════════
 // NAVIGATION
 // ══════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  $$('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const v = btn.dataset.view;
-      switchView(v);
-    });
+$$('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.view;
+    switchView(v);
   });
-
-  switchView(state.view);
 });
+
+switchView(state.view);
 
 function setPageStatus(message = '') {
   const statusEl = $('page-status');
@@ -54,7 +52,7 @@ function switchView(v) {
   viewEl.classList.add('active');
   if (navEl) navEl.classList.add('active');
 
-  const titles = { dashboard: 'Dashboard', cidadaos: 'Cidadãos', portes: 'Portes de Arma', cursos: 'Cursos' };
+  const titles = { dashboard: 'Dashboard', cidadaos: 'Cidadãos', portes: 'Portes de Arma', cursos: 'Cursos', curso: 'Estudo do Curso' };
   $('page-title').textContent = titles[v] || 'Sistema';
   setPageStatus('Carregando...');
 
@@ -62,6 +60,7 @@ function switchView(v) {
   if (v === 'cidadaos') loadCidadaos().finally(() => setPageStatus(''));
   if (v === 'portes') loadPortes().finally(() => setPageStatus(''));
   if (v === 'cursos') loadCursos().finally(() => setPageStatus(''));
+  if (v === 'curso') loadCourseStudy().finally(() => setPageStatus(''));
 }
 
 // ══════════════════════════════
@@ -259,7 +258,7 @@ async function loadCursos() {
     });
 
     if (!rows.length) {
-      body.innerHTML = `<tr><td colspan="5" class="empty-row">Nenhum curso encontrado</td></tr>`;
+      body.innerHTML = `<tr><td colspan="6" class="empty-row">Nenhum curso encontrado</td></tr>`;
       return;
     }
 
@@ -270,12 +269,54 @@ async function loadCursos() {
         <td>${esc(course.level)}</td>
         <td>${esc(course.duration)}</td>
         <td>${esc(course.description)}</td>
+        <td>
+          <button class="act-btn view" onclick="openCourse(${course.id})" title="Abrir curso">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 12h20L12 2z"/><path d="M2 12l10 10 10-10"/></svg>
+          </button>
+        </td>
       </tr>
     `).join('');
   } catch (error) {
-    body.innerHTML = `<tr><td colspan="5" class="empty-row">Erro ao carregar cursos. Atualize a página.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="6" class="empty-row">Erro ao carregar cursos. Atualize a página.</td></tr>`;
     console.error('loadCursos error:', error);
   }
+}
+
+async function openCourse(id) {
+  try {
+    const res = await fetch(`${API}/cursos/${id}`);
+    if (!res.ok) throw new Error('Curso não encontrado');
+    const course = await res.json();
+    state.currentCourse = course;
+    renderCourseStudy(course);
+    switchView('curso');
+  } catch (error) {
+    console.error('openCourse error:', error);
+  }
+}
+
+function loadCourseStudy() {
+  const course = state.currentCourse;
+  if (!course) {
+    return switchView('cursos');
+  }
+  renderCourseStudy(course);
+}
+
+function renderCourseStudy(course) {
+  $('study-course-title').textContent = course.title;
+  $('study-course-description').textContent = course.description;
+  $('study-course-category').textContent = course.category;
+  $('study-course-level').textContent = `Nível: ${course.level}`;
+  $('study-course-duration').textContent = `Duração: ${course.duration}`;
+  $('study-course-credits').textContent = `Créditos: ${course.credits}`;
+  $('study-course-term').textContent = `Período: ${course.term}`;
+  $('study-course-professor').textContent = `Professor: ${course.professor}`;
+  $('study-course-schedule').textContent = `Horário: ${course.schedule}`;
+  $('study-course-objectives').innerHTML = course.objectives.map(item => `<li>${esc(item)}</li>`).join('');
+  $('study-course-modules').innerHTML = course.modules.map(item => `<li>${esc(item)}</li>`).join('');
+  $('study-course-activities').innerHTML = course.activities.map(item => `<li>${esc(item)}</li>`).join('');
+  $('study-course-bibliography').innerHTML = course.bibliography.map(item => `<li>${esc(item)}</li>`).join('');
 }
 
 $('search-cursos').addEventListener('input', () => {
@@ -323,6 +364,11 @@ $('btn-novo-cidadao').addEventListener('click', openNew);
 $('btn-cancelar').addEventListener('click', closeModal);
 $('modal-close').addEventListener('click', closeModal);
 $('modal-overlay').addEventListener('click', e => { if (e.target === $('modal-overlay')) closeModal(); });
+$('btn-back-to-cursos').addEventListener('click', () => switchView('cursos'));
+
+function closeCourseModal() {
+  $('course-overlay').classList.remove('open');
+}
 
 function openNew() {
   state.editId = null;

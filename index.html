@@ -20,19 +20,19 @@
     </div>
   </div>
   <nav class="sidebar-nav">
-    <button type="button" class="nav-btn active" data-view="dashboard">
+    <button type="button" class="nav-btn active" data-view="dashboard" onclick="switchView('dashboard')">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Dashboard
     </button>
-    <button type="button" class="nav-btn" data-view="cidadaos">
+    <button type="button" class="nav-btn" data-view="cidadaos" onclick="switchView('cidadaos')">
       <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
       Cidadãos
     </button>
-    <button type="button" class="nav-btn" data-view="portes">
+    <button type="button" class="nav-btn" data-view="portes" onclick="switchView('portes')">
       <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       Portes de Arma
     </button>
-    <button type="button" class="nav-btn" data-view="cursos">
+    <button type="button" class="nav-btn" data-view="cursos" onclick="switchView('cursos')">
       <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       Cursos
     </button>
@@ -208,16 +208,78 @@
             <th>Nível</th>
             <th>Duração</th>
             <th>Descrição</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody id="courses-body">
-          <tr><td colspan="5" class="loading-row">Carregando cursos…</td></tr>
+          <tr><td colspan="6" class="loading-row">Carregando cursos…</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
+  <!-- CURSO ESTUDO VIEW -->
+  <section class="view" id="view-curso">
+    <div class="course-study-header">
+      <button type="button" class="btn-ghost" id="btn-back-to-cursos">← Voltar para Cursos</button>
+      <div class="course-study-top">
+        <span class="course-badge" id="study-course-category">Categoria</span>
+        <h2 id="study-course-title">Curso</h2>
+        <p id="study-course-description">Descrição</p>
+        <div class="course-meta-row">
+          <span id="study-course-level"></span>
+          <span id="study-course-duration"></span>
+          <span id="study-course-credits"></span>
+          <span id="study-course-term"></span>
+        </div>
+        <div class="course-meta-row">
+          <span id="study-course-professor"></span>
+          <span id="study-course-schedule"></span>
+        </div>
+      </div>
+    </div>
+    <div class="course-study-grid">
+      <div class="course-section">
+        <h3>Objetivos do Curso</h3>
+        <ul id="study-course-objectives"></ul>
+      </div>
+      <div class="course-section">
+        <h3>Estrutura Curricular</h3>
+        <ol id="study-course-modules"></ol>
+      </div>
+      <div class="course-section">
+        <h3>Atividades & Projetos</h3>
+        <ul id="study-course-activities"></ul>
+      </div>
+      <div class="course-section">
+        <h3>Bibliografia Recomendada</h3>
+        <ul id="study-course-bibliography"></ul>
+      </div>
+    </div>
+  </section>
 </main>
+
+<!-- COURSE DETAILS MODAL -->
+<div class="modal-overlay" id="course-overlay">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h2 id="course-title">Curso</h2>
+      <button class="modal-close" id="course-close">✕</button>
+    </div>
+    <div class="modal-body" id="course-body">
+      <p id="course-description"></p>
+      <div class="course-meta">
+        <span id="course-category"></span>
+        <span id="course-level"></span>
+        <span id="course-duration"></span>
+      </div>
+      <div class="course-activities">
+        <h3>Atividades</h3>
+        <ul id="course-activities"></ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL FORM -->
 <div class="modal-overlay" id="modal-overlay">

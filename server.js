@@ -33,6 +33,8 @@ const publicPaths = [
   '/register.html',
   '/auth.css',
   '/auth.js',
+  '/app.js',
+  '/style.css',
   '/favicon.ico',
   '/robots.txt',
   '/api/cursos',
@@ -49,7 +51,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  if (publicPaths.includes(req.path) || req.path.startsWith('/api/auth') || req.path.startsWith('/api/me')) {
+  if (publicPaths.includes(req.path) || req.path.startsWith('/api/auth') || req.path.startsWith('/api/me') || req.path.startsWith('/api/cursos')) {
     return next();
   }
 
@@ -178,7 +180,33 @@ const courses = [
     category: 'Direito',
     level: 'Iniciante',
     duration: '8 semanas',
+    credits: 16,
+    term: '1º Semestre',
+    professor: 'Dr. Rafael Andrade',
+    schedule: 'Segundas e Quartas, 19h às 22h',
     description: 'Introdução aos fundamentos do direito civil e penal, declaração de princípios e prática jurídica básica.',
+    objectives: [
+      'Compreender a estrutura do sistema jurídico brasileiro.',
+      'Interpretar normas de direito civil e penal.',
+      'Aplicar técnicas básicas de petições e defesas.',
+    ],
+    modules: [
+      'Direito Constitucional',
+      'Direito Penal Básico',
+      'Direito Civil I',
+      'Prática Jurídica',
+    ],
+    activities: [
+      'Aulas teóricas e práticas',
+      'Estudo de casos reais',
+      'Produção de petições iniciais',
+      'Simulação de audiências',
+    ],
+    bibliography: [
+      'Curso de Direito Constitucional – Pedro Lenza',
+      'Direito Penal – Rogério Greco',
+      'Manual de Processo Civil – José Miguel',
+    ],
   },
   {
     id: 2,
@@ -186,7 +214,33 @@ const courses = [
     category: 'Segurança',
     level: 'Intermediário',
     duration: '6 semanas',
+    credits: 12,
+    term: '1º Semestre',
+    professor: 'Capitão Eduardo Mello',
+    schedule: 'Terças e Quintas, 18h às 21h',
     description: 'Treinamento em legislação de armas, segurança no porte e uso responsável dentro das normas.',
+    objectives: [
+      'Conhecer a legislação de armas e porte.',
+      'Aprender manuseio seguro e manutenção.',
+      'Praticar transporte e armazenamento conforme normas.',
+    ],
+    modules: [
+      'Legislação de Armas',
+      'Segurança e Manuseio',
+      'Transporte e Armazenamento',
+      'Simulações Operacionais',
+    ],
+    activities: [
+      'Aulas de legislação aplicada',
+      'Treinamento de segurança',
+      'Estudo de casos de armamento',
+      'Exercícios práticos de manutenção',
+    ],
+    bibliography: [
+      'Estatuto do Desarmamento Comentado',
+      'Manual de Segurança com Armas de Fogo',
+      'Legislação Penal Aplicada',
+    ],
   },
   {
     id: 3,
@@ -194,7 +248,33 @@ const courses = [
     category: 'Gestão',
     level: 'Iniciante',
     duration: '10 semanas',
+    credits: 20,
+    term: '1º Semestre',
+    professor: 'Profª Marina Lopes',
+    schedule: 'Segundas e Quartas, 14h às 17h',
     description: 'Princípios de gestão, liderança, finanças básicas e organização de equipes administrativas.',
+    objectives: [
+      'Entender os fundamentos da administração.',
+      'Desenvolver habilidades de liderança.',
+      'Aprender conceitos de finanças e planejamento.',
+    ],
+    modules: [
+      'Fundamentos da Administração',
+      'Liderança e Gestão de Pessoas',
+      'Finanças Básicas',
+      'Planejamento Estratégico',
+    ],
+    activities: [
+      'Estudos de caso corporativos',
+      'Simulações de gestão',
+      'Elaboração de planos financeiros',
+      'Projetos de melhoria contínua',
+    ],
+    bibliography: [
+      'Administração – Idalberto Chiavenato',
+      'Gestão de Pessoas – Idalberto Chiavenato',
+      'Finanças Corporativas – Alexandre Assaf Neto',
+    ],
   },
   {
     id: 4,
@@ -202,12 +282,46 @@ const courses = [
     category: 'Operacional',
     level: 'Avançado',
     duration: '12 semanas',
+    credits: 24,
+    term: '2º Semestre',
+    professor: 'Major Ricardo Tavares',
+    schedule: 'Quartas e Sextas, 19h às 22h',
     description: 'Introdução à rotina do BOPE, táticas, disciplina e segurança em operações especiais.',
+    objectives: [
+      'Conhecer doutrinas e táticas operacionais.',
+      'Desenvolver disciplina e tomada de decisão.',
+      'Planejar operações especiais com segurança.',
+    ],
+    modules: [
+      'Doutrina BOPE',
+      'Táticas Avançadas',
+      'Equipamentos Especiais',
+      'Operações de Alto Risco',
+    ],
+    activities: [
+      'Treinamento tático',
+      'Exercícios de disciplina',
+      'Avaliações físicas e teóricas',
+      'Planejamento de missão',
+    ],
+    bibliography: [
+      'Manual de Operações Táticas',
+      'Disciplina Operacional',
+      'Segurança em Operações Especiais',
+    ],
   },
 ];
 
 app.get('/api/cursos', (req, res) => {
   res.json({ data: courses });
+});
+
+app.get('/api/cursos/:id', (req, res) => {
+  const course = courses.find(c => c.id === Number(req.params.id));
+  if (!course) {
+    return res.status(404).json({ error: 'Curso não encontrado' });
+  }
+  res.json(course);
 });
 
 let useSqlite = false;
