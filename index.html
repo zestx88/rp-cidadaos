@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Cidadãos — RP City</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">RP</div>
+    <div class="logo-text">
+      <span class="logo-title">CityBase</span>
+      <span class="logo-sub">Sistema Municipal</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" data-view="dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-btn" data-view="cidadaos">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+      Cidadãos
+    </button>
+    <button class="nav-btn" data-view="portes">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Portes de Arma
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="status-dot"></div>
+    <span>Sistema Online</span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title" id="page-title">Dashboard</h1>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-primary" id="btn-novo-cidadao">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Cidadão
+      </button>
+    </div>
+  </header>
+
+  <!-- DASHBOARD VIEW -->
+  <section class="view active" id="view-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon stat-blue">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total de Cidadãos</span>
+          <span class="stat-value" id="stat-total">—</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-red">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Com Porte de Arma</span>
+          <span class="stat-value" id="stat-portes">—</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-green">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Renda Média Semanal</span>
+          <span class="stat-value" id="stat-renda">—</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-purple">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Percentual Armado</span>
+          <span class="stat-value" id="stat-pct">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-bottom">
+      <div class="chart-card">
+        <h3 class="chart-title">Profissões Mais Comuns</h3>
+        <div id="profissoes-chart"></div>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">Distribuição de Portes</h3>
+        <div class="donut-wrap">
+          <svg id="donut-svg" viewBox="0 0 120 120"></svg>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CIDADAOS VIEW -->
+  <section class="view" id="view-cidadaos">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Buscar por nome, CPF ou profissão…" class="search-input" />
+      </div>
+      <div class="toolbar-controls">
+        <select id="sort-select" class="select-ctrl">
+          <option value="id">Ordenar: Cadastro</option>
+          <option value="nome">Ordenar: Nome</option>
+          <option value="renda">Ordenar: Renda</option>
+          <option value="profissao">Ordenar: Profissão</option>
+        </select>
+        <button class="btn-icon" id="sort-order-btn" title="Alternar ordem">
+          <svg viewBox="0 0 24 24"><path d="M3 9l4-4 4 4"/><path d="M7 5v14"/><path d="M21 15l-4 4-4-4"/><path d="M17 19V5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Profissão</th>
+            <th>Empresa</th>
+            <th>Renda Semanal</th>
+            <th>Porte</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="8" class="loading-row">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+  </section>
+
+  <!-- PORTES VIEW -->
+  <section class="view" id="view-portes">
+    <div class="portes-header">
+      <div class="alert-banner">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Registro restrito — apenas cidadãos com porte de arma autorizado
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Nº do Porte</th>
+            <th>Profissão</th>
+            <th>Telefone</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="portes-body">
+          <tr><td colspan="7" class="loading-row">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL FORM -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Novo Cidadão</h2>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="cidadao-form">
+        <input type="hidden" id="f-id" />
+        <div class="form-section-title">Dados Pessoais</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome Completo *</label>
+            <input type="text" id="f-nome" required placeholder="Ex: João da Silva" />
+          </div>
+          <div class="form-group">
+            <label>CPF do Jogo *</label>
+            <input type="text" id="f-cpf" required placeholder="000.000.000-00" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Data de Nascimento</label>
+            <input type="date" id="f-nascimento" />
+          </div>
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="text" id="f-telefone" placeholder="(00) 00000-0000" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Endereço</label>
+          <input type="text" id="f-endereco" placeholder="Rua, número, bairro" />
+        </div>
+
+        <div class="form-section-title">Trabalho & Renda</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Profissão</label>
+            <input type="text" id="f-profissao" placeholder="Ex: Policial, Médico…" />
+          </div>
+          <div class="form-group">
+            <label>Empresa</label>
+            <input type="text" id="f-empresa" placeholder="Onde trabalha" />
+          </div>
+        </div>
+        <div class="form-group half">
+          <label>Renda Semanal (R$)</label>
+          <input type="number" id="f-renda" min="0" step="0.01" placeholder="0.00" />
+        </div>
+
+        <div class="form-section-title">Porte de Arma</div>
+        <div class="form-row porte-row">
+          <div class="form-group toggle-group">
+            <label>Possui Porte de Arma?</label>
+            <div class="toggle-wrap">
+              <button type="button" class="toggle-btn active" id="porte-nao" data-val="0">Não</button>
+              <button type="button" class="toggle-btn" id="porte-sim" data-val="1">Sim</button>
+            </div>
+            <input type="hidden" id="f-porte" value="0" />
+          </div>
+          <div class="form-group" id="grupo-numero-porte" style="opacity:0.3;pointer-events:none">
+            <label>Número do Porte</label>
+            <input type="text" id="f-numero-porte" placeholder="PA-000000" />
+          </div>
+        </div>
+
+        <div class="form-section-title">Observações</div>
+        <div class="form-group">
+          <textarea id="f-obs" rows="3" placeholder="Anotações internas, antecedentes, notas…"></textarea>
+        </div>
+
+        <div class="form-error" id="form-error"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" id="btn-cancelar">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-salvar">Salvar Cidadão</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FICHA -->
+<div class="modal-overlay" id="ficha-overlay">
+  <div class="modal modal-ficha">
+    <div class="modal-header">
+      <h2>Ficha do Cidadão</h2>
+      <button class="modal-close" id="ficha-close">✕</button>
+    </div>
+    <div class="modal-body" id="ficha-body"></div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-overlay">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h2>Confirmar Exclusão</h2>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-sec);margin-bottom:1.5rem">Tem certeza que deseja excluir este cidadão? Esta ação não pode ser desfeita.</p>
+      <div class="modal-footer">
+        <button class="btn-ghost" id="confirm-cancel">Cancelar</button>
+        <button class="btn-danger" id="confirm-ok">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

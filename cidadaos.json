@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "nome_completo": "andré felipe",
+    "cpf": "981.1230.78-03",
+    "data_nascimento": "",
+    "telefone": "43998252291",
+    "porte_arma": 1,
+    "numero_porte": "PA-672148",
+    "profissao": "construtor, instrutor do exercito, Cabo",
+    "empresa": "Exercito",
+    "renda_semanal": 410,
+    "endereco": "perto do lago",
+    "observacoes": "",
+    "criado_em": "2026-06-17T23:00:30.495Z"
+  }
+]
