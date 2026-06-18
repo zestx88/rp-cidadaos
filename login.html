@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | RP Cidadãos</title>
+  <style>
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#08101f;color:#f4f7fb;display:grid;place-items:center;height:100vh;}
+    .card{width:min(420px,100%);padding:28px 26px 32px;background:rgba(8,16,31,.96);border:1px solid rgba(255,255,255,.08);border-radius:18px;box-shadow:0 18px 60px rgba(0,0,0,.24);}
+    h1{margin:0 0 10px;font-size:1.75rem;letter-spacing:-.02em;}
+    p{margin:0 0 22px;color:#8ea0b9;}
+    label{display:block;margin:.75rem 0 8px;font-size:.92rem;color:#c7d1e5;}
+    input{width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.04);color:#eaf0ff;font-size:1rem;outline:none;transition:.18s;border-color:rgba(255,255,255,.18);}
+    input:focus{border-color:#7c95ff;background:rgba(255,255,255,.08);}
+    button{width:100%;margin-top:20px;padding:13px 0;font-size:1rem;font-weight:600;color:#0b1222;background:#6e7dff;border:none;border-radius:14px;cursor:pointer;box-shadow:0 12px 30px rgba(110,125,255,.24);}
+    .link-row{margin-top:18px;text-align:center;font-size:.95rem;color:#8ea0b9;}
+    .link-row a{color:#9db4ff;text-decoration:none;}
+    .notice{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(144,166,255,.12);color:#d8e1ff;font-size:.94rem;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Entrar no Sistema</h1>
+    <p>Use seu e-mail e senha para acessar o painel de Cidadãos.</p>
+    <form action="/login" method="POST">
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" required autocomplete="username" />
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" required autocomplete="current-password" />
+      <button type="submit">Entrar</button>
+    </form>
+    <div class="link-row">
+      <span>Não tem conta? <a href="/register">Registrar</a></span>
+    </div>
+    <div id="message" class="notice" style="display:none;"></div>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const messageEl = document.getElementById('message');
+    if (params.get('error')) {
+      messageEl.textContent = 'E-mail ou senha inválidos. Tente novamente.';
+      messageEl.style.display = 'block';
+    } else if (params.get('registered')) {
+      messageEl.textContent = 'Cadastro realizado. Faça login para continuar.';
+      messageEl.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

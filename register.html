@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registrar | RP Cidadãos</title>
+  <style>
+    body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#08101f;color:#f4f7fb;display:grid;place-items:center;height:100vh;}
+    .card{width:min(460px,100%);padding:28px 26px 32px;background:rgba(8,16,31,.96);border:1px solid rgba(255,255,255,.08);border-radius:18px;box-shadow:0 18px 60px rgba(0,0,0,.24);}
+    h1{margin:0 0 10px;font-size:1.75rem;letter-spacing:-.02em;}
+    p{margin:0 0 22px;color:#8ea0b9;}
+    label{display:block;margin:.75rem 0 8px;font-size:.92rem;color:#c7d1e5;}
+    input{width:100%;padding:12px 14px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.04);color:#eaf0ff;font-size:1rem;outline:none;transition:.18s;border-color:rgba(255,255,255,.18);}
+    input:focus{border-color:#7c95ff;background:rgba(255,255,255,.08);}
+    button{width:100%;margin-top:20px;padding:13px 0;font-size:1rem;font-weight:600;color:#0b1222;background:#6e7dff;border:none;border-radius:14px;cursor:pointer;box-shadow:0 12px 30px rgba(110,125,255,.24);}
+    .link-row{margin-top:18px;text-align:center;font-size:.95rem;color:#8ea0b9;}
+    .link-row a{color:#9db4ff;text-decoration:none;}
+    .notice{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(255,110,110,.12);color:#ffd8d8;font-size:.94rem;}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Criar Conta</h1>
+    <p>Registre uma nova conta para acessar o painel de administração.</p>
+    <form action="/register" method="POST">
+      <label for="name">Nome completo</label>
+      <input id="name" name="name" type="text" required autocomplete="name" />
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" required autocomplete="email" />
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" required autocomplete="new-password" />
+      <label for="confirm_password">Confirmar senha</label>
+      <input id="confirm_password" name="confirm_password" type="password" required autocomplete="new-password" />
+      <button type="submit">Registrar</button>
+    </form>
+    <div class="link-row">
+      <span>Já tem conta? <a href="/login">Entrar</a></span>
+    </div>
+    <div id="message" class="notice" style="display:none;"></div>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const messageEl = document.getElementById('message');
+    if (params.get('error') === '1') {
+      messageEl.textContent = 'Verifique os dados e tente novamente. Senha precisa ter ao menos 8 caracteres.';
+      messageEl.style.display = 'block';
+    } else if (params.get('error') === '2') {
+      messageEl.textContent = 'Este e-mail já está em uso. Use outro e-mail ou faça login.';
+      messageEl.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

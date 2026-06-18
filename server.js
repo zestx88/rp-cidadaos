@@ -1,4 +1,6 @@
 const express = require('express');
+const session = require('express-session');
+const bcrypt = require('bcryptjs');
 let Database;
 try {
   Database = require('better-sqlite3');
@@ -11,15 +13,165 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const USERS_FILE = path.join(__dirname, 'users.json');
+const jsonFile = path.join(__dirname, 'cidadaos.json');
 
 app.use(cors());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'rp-cidade-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 },
+}));
+
+const publicPaths = [
+  '/login',
+  '/login.html',
+  '/register',
+  '/register.html',
+  '/auth.css',
+  '/auth.js',
+  '/favicon.ico',
+  '/robots.txt',
+];
+
+const blockedStaticFiles = ['/server.js', '/package.json', '/package-lock.json', '/users.json', '/cidadaos.db', '/cidadaos.json'];
+const blockedStaticPrefixes = ['/node_modules', '/php-auth', '/.git'];
+
+app.use((req, res, next) => {
+  if (blockedStaticFiles.includes(req.path) || blockedStaticPrefixes.some(prefix => req.path.startsWith(prefix))) {
+    return res.status(404).end();
+  }
+  next();
+});
+
+app.use((req, res, next) => {
+  if (publicPaths.includes(req.path) || req.path.startsWith('/api/auth') || req.path.startsWith('/api/me')) {
+    return next();
+  }
+
+  if (req.session && req.session.user) {
+    return next();
+  }
+
+  if (req.method === 'GET') {
+    return res.redirect('/login');
+  }
+
+  return res.status(401).json({ error: 'Não autorizado' });
+});
+
 app.use(express.static(path.join(__dirname)));
 
-// Init DB: use better-sqlite3 when disponível, caso contrário usar um arquivo JSON simples
+function loadUsers() {
+  if (!fs.existsSync(USERS_FILE)) {
+    const adminPassword = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'Admin@1234', 10);
+    const admin = {
+      id: 1,
+      name: 'Administrador',
+      email: 'admin@rpcidade.local',
+      password: adminPassword,
+      role: 'admin',
+      created_at: new Date().toISOString(),
+    };
+    fs.writeFileSync(USERS_FILE, JSON.stringify([admin], null, 2));
+    return [admin];
+  }
+  return JSON.parse(fs.readFileSync(USERS_FILE, 'utf8'));
+}
+
+function saveUsers(users) {
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+function getUserByEmail(email) {
+  const users = loadUsers();
+  return users.find(u => u.email.toLowerCase() === email.toLowerCase());
+}
+
+function getUserById(id) {
+  const users = loadUsers();
+  return users.find(u => u.id === id);
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Não autorizado' });
+  }
+  if (req.session.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  next();
+}
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+app.post('/login', (req, res) => {
+  const email = (req.body.email || '').trim();
+  const password = req.body.password || '';
+  const user = getUserByEmail(email);
+
+  if (!user || !bcrypt.compareSync(password, user.password)) {
+    return res.redirect('/login?error=1');
+  }
+
+  req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
+  res.redirect('/');
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie('connect.sid');
+    res.redirect('/login');
+  });
+});
+
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'register.html'));
+});
+
+app.post('/register', (req, res) => {
+  const name = (req.body.name || '').trim();
+  const email = (req.body.email || '').trim();
+  const password = req.body.password || '';
+  const confirm = req.body.confirm_password || '';
+
+  if (!name || !email || !password || !confirm || password !== confirm || password.length < 8) {
+    return res.redirect('/register?error=1');
+  }
+
+  if (getUserByEmail(email)) {
+    return res.redirect('/register?error=2');
+  }
+
+  const users = loadUsers();
+  const id = users.length ? Math.max(...users.map(u => u.id)) + 1 : 1;
+  users.push({
+    id,
+    name,
+    email,
+    password: bcrypt.hashSync(password, 10),
+    role: 'user',
+    created_at: new Date().toISOString(),
+  });
+  saveUsers(users);
+
+  res.redirect('/login?registered=1');
+});
+
+app.get('/api/me', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: 'Não autorizado' });
+  }
+  return res.json(req.session.user);
+});
+
 let useSqlite = false;
-let db; // sqlite db when available
-const jsonFile = path.join(__dirname, 'cidadaos.json');
+let db;
 if (Database) {
   try {
     db = new Database(path.join(__dirname, 'cidadaos.db'));
@@ -71,7 +223,6 @@ if (useSqlite) {
     seed.forEach(row => insert.run(...row));
   }
 } else {
-  // JSON fallback
   if (!fs.existsSync(jsonFile)) {
     const rows = seed.map((r, i) => ({
       id: i + 1,
@@ -81,7 +232,17 @@ if (useSqlite) {
   }
 }
 
-// GET all cidadaos with search, filter, sort, pagination
+function userHasEditRights(req) {
+  return req.session.user && req.session.user.role === 'admin';
+}
+
+function requireAdminEdit(req, res, next) {
+  if (!userHasEditRights(req)) {
+    return res.status(403).json({ error: 'Apenas administradores podem alterar os dados.' });
+  }
+  next();
+}
+
 app.get('/api/cidadaos', (req, res) => {
   const { search, porte, sort, order, page = 1, limit = 10 } = req.query;
   const pageNum = parseInt(page) || 1;
@@ -107,7 +268,6 @@ app.get('/api/cidadaos', (req, res) => {
     return res.json({ data: rows, total, page: pageNum, pages: Math.ceil(total / lim) });
   }
 
-  // JSON fallback
   const all = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
   let filtered = all.slice();
   if (search) {
@@ -129,7 +289,6 @@ app.get('/api/cidadaos', (req, res) => {
   res.json({ data: rows, total, page: pageNum, pages: Math.ceil(total / lim) });
 });
 
-// GET single cidadao
 app.get('/api/cidadaos/:id', (req, res) => {
   const id = parseInt(req.params.id);
   if (useSqlite) {
@@ -143,8 +302,7 @@ app.get('/api/cidadaos/:id', (req, res) => {
   res.json(row);
 });
 
-// POST create
-app.post('/api/cidadaos', (req, res) => {
+app.post('/api/cidadaos', requireAdminEdit, (req, res) => {
   const { nome_completo, cpf, data_nascimento, telefone, porte_arma, numero_porte, profissao, empresa, renda_semanal, endereco, observacoes } = req.body;
   if (useSqlite) {
     try {
@@ -159,7 +317,6 @@ app.post('/api/cidadaos', (req, res) => {
     }
   }
 
-  // JSON fallback
   const all = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
   if (all.find(r => r.cpf === cpf)) return res.status(400).json({ error: 'CPF já cadastrado' });
   const id = all.length ? Math.max(...all.map(r => r.id)) + 1 : 1;
@@ -169,8 +326,7 @@ app.post('/api/cidadaos', (req, res) => {
   res.json({ id });
 });
 
-// PUT update
-app.put('/api/cidadaos/:id', (req, res) => {
+app.put('/api/cidadaos/:id', requireAdminEdit, (req, res) => {
   const id = parseInt(req.params.id);
   const { nome_completo, cpf, data_nascimento, telefone, porte_arma, numero_porte, profissao, empresa, renda_semanal, endereco, observacoes } = req.body;
   if (useSqlite) {
@@ -195,8 +351,7 @@ app.put('/api/cidadaos/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// DELETE
-app.delete('/api/cidadaos/:id', (req, res) => {
+app.delete('/api/cidadaos/:id', requireAdminEdit, (req, res) => {
   const id = parseInt(req.params.id);
   if (useSqlite) {
     db.prepare('DELETE FROM cidadaos WHERE id = ?').run(id);
@@ -208,7 +363,6 @@ app.delete('/api/cidadaos/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-// Dashboard stats
 app.get('/api/dashboard', (req, res) => {
   if (useSqlite) {
     const total = db.prepare('SELECT COUNT(*) as c FROM cidadaos').get().c;

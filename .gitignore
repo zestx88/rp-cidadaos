@@ -1,0 +1,6 @@
+node_modules/
+users.json
+cidadaos.db
+.DS_Store
+npm-debug.log*
+yarn-error.log*
