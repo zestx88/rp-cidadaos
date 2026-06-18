@@ -32,6 +32,10 @@
       <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       Portes de Arma
     </button>
+    <button class="nav-btn" data-view="cursos">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      Cursos
+    </button>
   </nav>
   <div class="sidebar-footer">
     <div class="status-dot"></div>
@@ -179,6 +183,32 @@
         </thead>
         <tbody id="portes-body">
           <tr><td colspan="7" class="loading-row">Carregando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CURSOS VIEW -->
+  <section class="view" id="view-cursos">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-cursos" placeholder="Buscar curso…" class="search-input" />
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Curso</th>
+            <th>Categoria</th>
+            <th>Nível</th>
+            <th>Duração</th>
+            <th>Descrição</th>
+          </tr>
+        </thead>
+        <tbody id="courses-body">
+          <tr><td colspan="5" class="loading-row">Carregando cursos…</td></tr>
         </tbody>
       </table>
     </div>

@@ -38,12 +38,13 @@ function switchView(v) {
   $(`view-${v}`).classList.add('active');
   document.querySelector(`[data-view="${v}"]`).classList.add('active');
 
-  const titles = { dashboard: 'Dashboard', cidadaos: 'Cidadãos', portes: 'Portes de Arma' };
+  const titles = { dashboard: 'Dashboard', cidadaos: 'Cidadãos', portes: 'Portes de Arma', cursos: 'Cursos' };
   $('page-title').textContent = titles[v];
 
   if (v === 'dashboard') loadDashboard();
   if (v === 'cidadaos') loadCidadaos();
   if (v === 'portes') loadPortes();
+  if (v === 'cursos') loadCursos();
 }
 
 // ══════════════════════════════
@@ -219,6 +220,40 @@ sortBtn.addEventListener('click', () => {
   sortBtn.style.color = state.order === 'desc' ? 'var(--accent)' : '';
   state.page = 1;
   loadCidadaos();
+});
+
+// ══════════════════════════════
+// CURSOS VIEW
+// ══════════════════════════════
+async function loadCursos() {
+  const data = await fetch(`${API}/cursos`).then(r => r.json());
+  const body = $('courses-body');
+  const filter = $('search-cursos').value.trim().toLowerCase();
+  const rows = data.data.filter(course => {
+    if (!filter) return true;
+    return [course.title, course.category, course.level, course.description]
+      .filter(Boolean)
+      .some(field => field.toLowerCase().includes(filter));
+  });
+
+  if (!rows.length) {
+    body.innerHTML = `<tr><td colspan="5" class="empty-row">Nenhum curso encontrado</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = rows.map(course => `
+    <tr>
+      <td>${esc(course.title)}</td>
+      <td>${esc(course.category)}</td>
+      <td>${esc(course.level)}</td>
+      <td>${esc(course.duration)}</td>
+      <td>${esc(course.description)}</td>
+    </tr>
+  `).join('');
+}
+
+$('search-cursos').addEventListener('input', () => {
+  if (state.view === 'cursos') loadCursos();
 });
 
 // ══════════════════════════════

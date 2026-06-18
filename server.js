@@ -170,6 +170,45 @@ app.get('/api/me', (req, res) => {
   return res.json(req.session.user);
 });
 
+const courses = [
+  {
+    id: 1,
+    title: 'Advocacia Básica',
+    category: 'Direito',
+    level: 'Iniciante',
+    duration: '8 semanas',
+    description: 'Introdução aos fundamentos do direito civil e penal, declaração de princípios e prática jurídica básica.',
+  },
+  {
+    id: 2,
+    title: 'Curso de Armas',
+    category: 'Segurança',
+    level: 'Intermediário',
+    duration: '6 semanas',
+    description: 'Treinamento em legislação de armas, segurança no porte e uso responsável dentro das normas.',
+  },
+  {
+    id: 3,
+    title: 'Administração',
+    category: 'Gestão',
+    level: 'Iniciante',
+    duration: '10 semanas',
+    description: 'Princípios de gestão, liderança, finanças básicas e organização de equipes administrativas.',
+  },
+  {
+    id: 4,
+    title: 'BOPE',
+    category: 'Operacional',
+    level: 'Avançado',
+    duration: '12 semanas',
+    description: 'Introdução à rotina do BOPE, táticas, disciplina e segurança em operações especiais.',
+  },
+];
+
+app.get('/api/cursos', (req, res) => {
+  res.json({ data: courses });
+});
+
 let useSqlite = false;
 let db;
 if (Database) {
