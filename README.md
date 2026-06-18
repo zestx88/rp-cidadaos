@@ -42,3 +42,22 @@ http://localhost:8000/login.php
 ## Observação
 
 O módulo PHP está separado do app Node.js principal e funciona em um servidor PHP diferente. Ele não é executado pelo `server.js` do Node.
+
+## Como acessar o módulo PHP
+
+Para usar o sistema de login PHP, execute o servidor embutido do PHP dentro da pasta `php-auth`:
+
+```bash
+cd php-auth
+php -S localhost:8000
+```
+
+Depois abra no navegador:
+
+```text
+http://localhost:8000/login.php
+```
+
+Se quiser usar o módulo PHP junto com o app Node, deixe o servidor Node rodando em `localhost:3000` e o servidor PHP em `localhost:8000`.
+
+A partir do app Node principal, use o botão **Guia PHP** no topo para ver estas instruções rapidamente.
