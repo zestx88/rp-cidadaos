@@ -185,6 +185,20 @@ body {
   font-weight: 700;
   color: var(--text-pri);
 }
+.page-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.page-status {
+  font-size: 0.9rem;
+  color: var(--text-sec);
+  background: rgba(255,255,255,0.06);
+  padding: 4px 10px;
+  border-radius: 999px;
+  min-width: 120px;
+  text-align: center;
+}
 
 /* ══════════════════════════════
    VIEWS

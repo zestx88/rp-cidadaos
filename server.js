@@ -35,6 +35,7 @@ const publicPaths = [
   '/auth.js',
   '/favicon.ico',
   '/robots.txt',
+  '/api/cursos',
 ];
 
 const blockedStaticFiles = ['/server.js', '/package.json', '/package-lock.json', '/users.json', '/cidadaos.db', '/cidadaos.json'];

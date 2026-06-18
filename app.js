@@ -24,27 +24,44 @@ const $$ = sel => document.querySelectorAll(sel);
 // ══════════════════════════════
 // NAVIGATION
 // ══════════════════════════════
-$$('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const v = btn.dataset.view;
-    switchView(v);
+window.addEventListener('DOMContentLoaded', () => {
+  $$('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.view;
+      switchView(v);
+    });
   });
+
+  switchView(state.view);
 });
 
+function setPageStatus(message = '') {
+  const statusEl = $('page-status');
+  if (statusEl) {
+    statusEl.textContent = message;
+  }
+}
+
 function switchView(v) {
+  if (!v) return;
+  const viewEl = $(`view-${v}`);
+  const navEl = document.querySelector(`[data-view="${v}"]`);
+  if (!viewEl) return;
+
   state.view = v;
   $$('.view').forEach(el => el.classList.remove('active'));
   $$('.nav-btn').forEach(el => el.classList.remove('active'));
-  $(`view-${v}`).classList.add('active');
-  document.querySelector(`[data-view="${v}"]`).classList.add('active');
+  viewEl.classList.add('active');
+  if (navEl) navEl.classList.add('active');
 
   const titles = { dashboard: 'Dashboard', cidadaos: 'Cidadãos', portes: 'Portes de Arma', cursos: 'Cursos' };
-  $('page-title').textContent = titles[v];
+  $('page-title').textContent = titles[v] || 'Sistema';
+  setPageStatus('Carregando...');
 
-  if (v === 'dashboard') loadDashboard();
-  if (v === 'cidadaos') loadCidadaos();
-  if (v === 'portes') loadPortes();
-  if (v === 'cursos') loadCursos();
+  if (v === 'dashboard') loadDashboard().finally(() => setPageStatus(''));
+  if (v === 'cidadaos') loadCidadaos().finally(() => setPageStatus(''));
+  if (v === 'portes') loadPortes().finally(() => setPageStatus(''));
+  if (v === 'cursos') loadCursos().finally(() => setPageStatus(''));
 }
 
 // ══════════════════════════════
@@ -226,30 +243,39 @@ sortBtn.addEventListener('click', () => {
 // CURSOS VIEW
 // ══════════════════════════════
 async function loadCursos() {
-  const data = await fetch(`${API}/cursos`).then(r => r.json());
   const body = $('courses-body');
-  const filter = $('search-cursos').value.trim().toLowerCase();
-  const rows = data.data.filter(course => {
-    if (!filter) return true;
-    return [course.title, course.category, course.level, course.description]
-      .filter(Boolean)
-      .some(field => field.toLowerCase().includes(filter));
-  });
+  body.innerHTML = `<tr><td colspan="5" class="loading-row">⟳ Carregando cursos…</td></tr>`;
 
-  if (!rows.length) {
-    body.innerHTML = `<tr><td colspan="5" class="empty-row">Nenhum curso encontrado</td></tr>`;
-    return;
+  try {
+    const res = await fetch(`${API}/cursos`);
+    if (!res.ok) throw new Error('Falha ao carregar cursos');
+    const data = await res.json();
+    const filter = $('search-cursos').value.trim().toLowerCase();
+    const rows = data.data.filter(course => {
+      if (!filter) return true;
+      return [course.title, course.category, course.level, course.description]
+        .filter(Boolean)
+        .some(field => field.toLowerCase().includes(filter));
+    });
+
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="5" class="empty-row">Nenhum curso encontrado</td></tr>`;
+      return;
+    }
+
+    body.innerHTML = rows.map(course => `
+      <tr>
+        <td>${esc(course.title)}</td>
+        <td>${esc(course.category)}</td>
+        <td>${esc(course.level)}</td>
+        <td>${esc(course.duration)}</td>
+        <td>${esc(course.description)}</td>
+      </tr>
+    `).join('');
+  } catch (error) {
+    body.innerHTML = `<tr><td colspan="5" class="empty-row">Erro ao carregar cursos. Atualize a página.</td></tr>`;
+    console.error('loadCursos error:', error);
   }
-
-  body.innerHTML = rows.map(course => `
-    <tr>
-      <td>${esc(course.title)}</td>
-      <td>${esc(course.category)}</td>
-      <td>${esc(course.level)}</td>
-      <td>${esc(course.duration)}</td>
-      <td>${esc(course.description)}</td>
-    </tr>
-  `).join('');
 }
 
 $('search-cursos').addEventListener('input', () => {
